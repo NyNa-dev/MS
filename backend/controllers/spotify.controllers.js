@@ -128,3 +128,36 @@ export const getUser = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
+
+export const searchTracksByMood = async (req, res) => {
+    try {
+        
+        const spotifyAccessToken = req.cookies.spotify_access_token;
+        if (!spotifyAccessToken) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const spotifyApi = new SpotifyWebApi({
+            clientId: process.env.SPOTIFY_CLIENT_ID,
+            clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+            redirectUri: process.env.SPOTIFY_REDIRECT_URI
+        })
+        spotifyApi.setAccessToken(spotifyAccessToken);
+
+
+
+        const { mood } = req.query;
+        if (!mood) {
+            return res.status(400).json({ error: "Bad request parameters" });
+        }
+
+        const searchResults = await spotifyApi.searchTracks(`mood:${mood}`, { limit: 10 });
+        res.status(200).json()
+
+
+
+    } catch (error) {
+        console.log("Error in searchHandler controller", error.message);
+        res.status(500).json({ error: "Internal Server Error" });        
+    }
+}
