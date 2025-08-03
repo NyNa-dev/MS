@@ -1,9 +1,19 @@
-import spotifyApi from "../utils/spotify.js";
+// import spotifyApi from "../utils/spotify.js";
+import SpotifyWebApi from "spotify-web-api-node";
+
 import { v4 as uuid } from "uuid";
+
 
 
 export const redirectToSpotifyLogin = (req, res) => {
     try {
+
+        const spotifyApi = new SpotifyWebApi({
+            clientId: process.env.SPOTIFY_CLIENT_ID,
+            clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+            redirectUri: process.env.SPOTIFY_REDIRECT_URI
+        })
+
         const state = uuid();
         const scopes = [
             "user-read-private",
@@ -20,11 +30,19 @@ export const redirectToSpotifyLogin = (req, res) => {
 
     } catch (error) {
         console.log("Error in redirectToSpotifyLogin controller", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Internal Server Error2" });
     }
 }
 
 export const spotifyCallback = async (req, res) => {
+
+    const spotifyApi = new SpotifyWebApi({
+        clientId: process.env.SPOTIFY_CLIENT_ID,
+        clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+        redirectUri: process.env.SPOTIFY_REDIRECT_URI
+    })
+
+
     //Check CSRF
     const returnedState = req.query.state;
     const storedState = req.cookies.spotify_auth_state;
@@ -55,7 +73,7 @@ export const spotifyCallback = async (req, res) => {
             httpOnly: true // Cookie will expire in 1 hour
         })
         res.cookie("spotify_refresh_token", refreshToken, {
-            maxAge: 1000 * 60 * 60, // Cookie will expire in 1 hour
+            maxAge: 1000 * 60 * 60 * 6, // Cookie will expire in 6 hour
             httpOnly: true // Cookie will expire in 1 hour
         })
 
@@ -68,7 +86,7 @@ export const spotifyCallback = async (req, res) => {
 
 
     } catch (error) {
-        console.log("Error in Spotify callback controller", error.message);
+        console.log("Error in Spotify callback controller:", error.message);
         if (!res.headersSent) {
             res.status(500).json({ error: "Internal Server Error" });
         }
@@ -77,6 +95,20 @@ export const spotifyCallback = async (req, res) => {
 
 export const getUser = async (req, res) => {
     try {
+
+        const spotifyAccessToken = req.cookies.spotify_access_token;
+        if (!spotifyAccessToken) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const spotifyApi = new SpotifyWebApi({
+            clientId: process.env.SPOTIFY_CLIENT_ID,
+            clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+            redirectUri: process.env.SPOTIFY_REDIRECT_URI
+        })
+
+
+        spotifyApi.setAccessToken(spotifyAccessToken);
         const me = await spotifyApi.getMe();
         if (!me.body) {
             return res.status(404).json({ error: "User not found" });
@@ -84,7 +116,10 @@ export const getUser = async (req, res) => {
         res.status(200).json({
             id: me.body.id,
             displayName: me.body.display_name,
-            email: me.body.email
+            email: me.body.email,
+            type: me.body.type,
+            href: me.body.href,
+            product: me.body.product,
         })
 
 
