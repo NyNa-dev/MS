@@ -6,7 +6,7 @@ import { v4 as uuid } from "uuid";
 
 
 
-export const redirectToSpotifyLogin = (req, res) => {
+export const redirectToSpotifyLogin = async (req, res) => {
     try {
 
         const spotifyApi = new SpotifyWebApi({
@@ -20,11 +20,12 @@ export const redirectToSpotifyLogin = (req, res) => {
             "user-read-private",
             "user-read-email"
         ]
-        const authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+
+        const authorizeURL = spotifyApi.createAuthorizeURL(scopes, state) + "&show_dialog=true";
 
         res.cookie("spotify_auth_state", state, {
-            maxAge: 1000 * 60 * 15, // Cookie will expire in 15 minutes
-            httpOnly: true, // Cookie is not accessible via JavaScript
+            maxAge: 1000 * 60 * 15, // 15 minutes
+            httpOnly: true,
         })
 
         return res.redirect(authorizeURL);
