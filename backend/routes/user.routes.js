@@ -6,5 +6,8 @@ import { getUsersforSidebar } from "../controllers/user.controller.js";
 const router = express.Router();
 
 router.get("/", protectRoute, getUsersforSidebar) 
+router.get("/health", (req, res) => {
+    res.status(200).json({ message: "User service is running" });
+})
 
 export default router;
