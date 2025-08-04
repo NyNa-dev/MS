@@ -1,5 +1,6 @@
 // import spotifyApi from "../utils/spotify.js";
 import SpotifyWebApi from "spotify-web-api-node";
+import 'dotenv/config';
 
 import { v4 as uuid } from "uuid";
 
