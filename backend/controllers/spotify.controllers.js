@@ -59,7 +59,7 @@ export const spotifyCallback = async (req, res) => {
     }
     try {
 
-        //retrieve aothorization code
+        //retrieve authorization code
         const data = await spotifyApi.authorizationCodeGrant(code);
         const accessToken = data.body.access_token;
         const refreshToken = data.body.refresh_token;
