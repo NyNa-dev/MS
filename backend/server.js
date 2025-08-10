@@ -8,6 +8,9 @@ import messageRoutes from "./routes/message.routes.js"; // Importing the message
 import userRoutes from "./routes/user.routes.js"; // Importing the user routes
 import spotifyRoutes from "./routes/spotify.routes.js"; // Importing the Spotify routes
 import youtubeRoutes from "./routes/youtube.routes.js"; // Importing the YouTube routes
+import emotionRoutes from "./routes/emotion.js"; // Importing the emotion routes
+
+
 
 import connectToMongo from "./db/connectToMongo.js";
 
@@ -26,6 +29,7 @@ app.use("/api/messages",messageRoutes);
 app.use("/api/users",userRoutes);
 app.use("/api/spotify", spotifyRoutes);
 app.use("/api/youtube", youtubeRoutes); 
+app.use("/api/emotion", emotionRoutes); // Importing the emotion routes
 
 
 app.listen(PORT, () => {
