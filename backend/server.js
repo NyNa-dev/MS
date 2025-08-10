@@ -8,7 +8,7 @@ import messageRoutes from "./routes/message.routes.js"; // Importing the message
 import userRoutes from "./routes/user.routes.js"; // Importing the user routes
 import spotifyRoutes from "./routes/spotify.routes.js"; // Importing the Spotify routes
 import youtubeRoutes from "./routes/youtube.routes.js"; // Importing the YouTube routes
-import emotionRoutes from "./routes/emotion.js"; // Importing the emotion routes
+import emotionRoutes from "./routes/emotion.routes.js"; // Importing the emotion routes
 
 
 

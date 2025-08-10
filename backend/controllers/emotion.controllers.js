@@ -14,7 +14,7 @@ export const getEmotion = async (req, res) => {
 
         const emotionsArray = response.data.emotions && response.data.emotions[0];
         let primaryEmotion
-        
+
         if (emotionsArray && Array.isArray(emotionsArray) && emotionsArray.length > 0) {
             primaryEmotion = emotionsArray.reduce((max, emo) => {
                 return emo.score > max.score ? emo : max;
@@ -24,15 +24,15 @@ export const getEmotion = async (req, res) => {
                 error: "No emotions detected"
             })
         }
-        
 
-        res.status(200).json({
+
+        return res.status(200).json({
             message,
             response: emotionsArray,
             primaryEmotion
         })
     } catch (error) {
         console.log("Error calling emotion api: ", error)
-        res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 }

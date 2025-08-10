@@ -131,9 +131,8 @@ export const getUser = async (req, res) => {
     }
 }
 
-export const searchTracksByMood = async (req, res) => {
+export const searchPlaylistsByMood = async (req, res) => {
     try {
-        
         const spotifyAccessToken = req.cookies.spotify_access_token;
         if (!spotifyAccessToken) {
             return res.status(401).json({ error: "Unauthorized" });
@@ -143,9 +142,9 @@ export const searchTracksByMood = async (req, res) => {
             clientId: process.env.SPOTIFY_CLIENT_ID,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
             redirectUri: process.env.SPOTIFY_REDIRECT_URI
-        })
-        spotifyApi.setAccessToken(spotifyAccessToken);
+        });
 
+        spotifyApi.setAccessToken(spotifyAccessToken);
 
 
         const { mood } = req.query;
@@ -153,13 +152,82 @@ export const searchTracksByMood = async (req, res) => {
             return res.status(400).json({ error: "Bad request parameters" });
         }
 
-        const searchResults = await spotifyApi.searchTracks(`mood:${mood}`, { limit: 10 });
-        res.status(200).json()
+        const searchQuery = `${mood} playlist`;
+        const alternativeSearch = await spotifyApi.searchPlaylists(searchQuery, {
+            limit: 10,
+            include_external: "audio"
+        });
 
-
+        res.status(200).json({
+            mood,
+            playlists: alternativeSearch.body?.playlists?.items || [],
+            total: alternativeSearch.body?.playlists?.total || 0
+        });
 
     } catch (error) {
-        console.log("Error in searchHandler controller", error.message);
-        res.status(500).json({ error: "Internal Server Error" });        
+        console.log("ERROR in searchPlaylistsByMood controller: ", error);
+
+        // Handle specific Spotify API errors
+        if (error.statusCode === 401) {
+            return res.status(401).json({ error: "Spotify token expired or invalid" });
+        }
+        if (error.statusCode === 403) {
+            return res.status(403).json({ error: "Spotify API access forbidden" });
+        }
+        if (error.statusCode === 429) {
+            return res.status(429).json({ error: "Rate limit exceeded" });
+        }
+
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
-}
+};
+
+export const searchTracksByMood = async (req, res) => {
+    try {
+        const spotifyAccessToken = req.cookies.spotify_access_token;
+        if (!spotifyAccessToken) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const spotifyApi = new SpotifyWebApi({
+            clientId: process.env.SPOTIFY_CLIENT_ID,
+            clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+            redirectUri: process.env.SPOTIFY_REDIRECT_URI
+        });
+
+        spotifyApi.setAccessToken(spotifyAccessToken);
+
+        const { mood } = req.query;
+        if (!mood) {
+            return res.status(400).json({ error: "Bad request parameters" });
+        }
+
+        const searchResult = await spotifyApi.searchTracks(`mood:${mood}`, {
+            limit: 10,
+            include_external: 'audio',
+            market: "US"
+        });
+
+        res.status(200).json({
+            mood,
+            tracks: searchResult.body?.tracks?.items || [],
+            total: searchResult.body?.tracks?.total || 0
+        });
+
+    } catch (error) {
+        console.log("ERROR in searchPlaylistsByMood controller: ", error);
+
+        // Handle specific Spotify API errors
+        if (error.statusCode === 401) {
+            return res.status(401).json({ error: "Spotify token expired or invalid" });
+        }
+        if (error.statusCode === 403) {
+            return res.status(403).json({ error: "Spotify API access forbidden" });
+        }
+        if (error.statusCode === 429) {
+            return res.status(429).json({ error: "Rate limit exceeded" });
+        }
+
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
+    }
+};
