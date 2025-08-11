@@ -4,17 +4,17 @@ import generateTokenandSetCookie from "../utils/generateToken.js";
 
 
 // Logic for signing up a user
-export const signup = async(req, res) => {
-    try{
-        const {firstName, lastName, username, email, password, confirmPassword, gender} = req.body;
+export const signup = async (req, res) => {
+    try {
+        const { firstName, lastName, username, email, password, confirmPassword, gender } = req.body;
 
-        if(password !== confirmPassword) {
-            return res.status(400).json({message: "Passwords do not match"});
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: "Passwords do not match" });
         }
 
-        const user = await User.findOne({username});
-        if(user) {
-            return res.status(400).json({message: "Username already exists"});
+        const user = await User.findOne({ username });
+        if (user) {
+            return res.status(400).json({ message: "Username already exists" });
         }
 
         //HASH PASSWORD HERE
@@ -26,21 +26,21 @@ export const signup = async(req, res) => {
         const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`
         const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`
 
-        const newUser = new User ({
+        const newUser = new User({
             firstName,
             lastName,
             username,
             email,
             password: hashedPassword,
             gender,
-            profilePicture : gender === "male" ? boyProfilePic : girlProfilePic
+            profilePicture: gender === "male" ? boyProfilePic : girlProfilePic
 
         });
 
 
-        if (newUser){
+        if (newUser) {
             // Generate JWT token
-             generateTokenandSetCookie(newUser._id, res);
+            generateTokenandSetCookie(newUser._id, res);
 
             await newUser.save();
             res.status(201).json({
@@ -52,28 +52,33 @@ export const signup = async(req, res) => {
                 profilePicture: newUser.profilePicture
             })
         }
-        else{
-            res.status(400).json({error: "Bad Request, User not created"}); 
+        else {
+            res.status(400).json({ error: "Bad Request, User not created" });
         }
 
-    } catch(error) {
+    } catch (error) {
         console.log("Error in signup controller", error.message);
-        res.status(500).json({error:"Internal Server Error"});
-    
-}
+        res.status(500).json({ error: "Internal Server Error" });
+
+    }
 };
 
 // Logic for logging in a user
-export const login = async(req, res) => {
-    try{
-        const {username, password} = req.body;
-        const user = await User.findOne({username});
-        const isPasswordCorrect = await bcrypt.compare(password, user.password || "");
+export const login = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
 
-        if(!user || !isPasswordCorrect){
-            return res.status(400).json({error: "Invalid username or password"});
+        if (!user) {
+            return res.status(400).json({ error: "Invalid username or password" });
         }
-        
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ error: "Invalid username or password" });
+        }
+
         generateTokenandSetCookie(user._id, res);
 
         res.status(200).json({
@@ -85,25 +90,25 @@ export const login = async(req, res) => {
         });
 
 
-    } catch(error) {
+    } catch (error) {
         console.log("Error in login controller", error.message);
-        res.status(500).json({error:"Internal Server Error"});
+        res.status(500).json({ error: "Internal Server Error" });
 
-    } 
-  
+    }
+
 };
 
 // Logic for logging out a user
 export const logout = (req, res) => {
-    
-try{
-    res.cookie("jwt", "", {maxAge: 0}); // Set the cookie to expire immediately
-    res.status(200).json({message:"Logged out sucessfully"});
 
-} catch(error) {
-    console.log("Error in logout controller", error.message);
-    res.status(500).json({error:"Internal Server Error"});
-};
+    try {
+        res.cookie("jwt", "", { maxAge: 0 }); // Set the cookie to expire immediately
+        res.status(200).json({ message: "Logged out sucessfully" });
+
+    } catch (error) {
+        console.log("Error in logout controller", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    };
 
 
 };

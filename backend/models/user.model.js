@@ -41,6 +41,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
+
+    preferredPlatform:{
+        type:String,
+        enum: ["spotify", "youtube", null],
+        default: null,
+
+    },
     // createdAt, updateAt
 }, {timestamps: true}
 );

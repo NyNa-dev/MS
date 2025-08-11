@@ -19,3 +19,27 @@ export const getUsersforSidebar = async (req, res) => {
     }
 
 }
+
+// exports .setPreferredPlatform = async (req, res) => {
+//   try {
+//     const { platform } = req.body;
+//     if (!platform) {
+//       return res.status(400).json({ message: 'Platform is required' });
+//     }
+
+//     const validPlatforms = ['spotify', 'youtube', 'apple_music'];
+//     if (!validPlatforms.includes(platform)) {
+//       return res.status(400).json({ message: 'Invalid platform' });
+//     }
+
+//     const user = await User.findByIdAndUpdate(
+//       req.user.id, // requires protectRoute middleware to set req.user
+//       { preferredPlatform: platform },
+//       { new: true }
+//     );
+
+//     res.json({ message: 'Platform updated successfully', user });
+//   } catch (err) {
+//     res.status(500).json({ message: 'Server error', error: err.message });
+//   }
+// };
